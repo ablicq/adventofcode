@@ -94,6 +94,7 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
+	defer readFile.Close()
 
 	fileScanner := bufio.NewScanner(readFile)
 	fileScanner.Split(bufio.ScanLines)
