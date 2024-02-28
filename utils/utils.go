@@ -3,6 +3,8 @@ package utils
 import (
 	"bufio"
 	"os"
+	"strconv"
+	"strings"
 )
 
 func ParseInput(inputPath string) []string {
@@ -23,4 +25,23 @@ func ParseInput(inputPath string) []string {
 	}
 
 	return ret
+}
+
+func ParseIntList(line string) []int {
+	parts := strings.Split(line, " ")
+	ret := make([]int, 0, len(parts))
+	for _, p := range parts {
+		if i, err := strconv.Atoi(p); err == nil {
+			ret = append(ret, i)
+		}
+	}
+	return ret
+}
+
+func ParseInt(s string) int {
+	i, err := strconv.Atoi(s)
+	if err != nil {
+		panic(err)
+	}
+	return i
 }
