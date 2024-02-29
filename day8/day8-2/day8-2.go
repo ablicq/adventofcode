@@ -38,15 +38,6 @@ func journey(net map[string]Node, steps string, start string) int {
 	return i
 }
 
-func isEndState(nodes []string) bool {
-	for _, n := range nodes {
-		if n[2] != 'Z' {
-			return false
-		}
-	}
-	return true
-}
-
 func gcd(a, b int) int {
 	for b != 0 {
 		a, b = b, a%b
