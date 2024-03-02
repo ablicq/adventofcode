@@ -116,6 +116,7 @@ func nextScout(grid []string, previousScout pos, scoutPos pos) pos {
 }
 
 func GetWeight(tile rune) float64 {
+	// 'F7' and 'LJ' do not count as a crossing but 'FJ' and 'L7' count as 1, hence the 0.5 and -0.5 weights
 	switch tile {
 	case '|':
 		return 1.0
@@ -147,8 +148,10 @@ func main() {
 		previousScout, scout = scout, nextScout(grid, previousScout, scout)
 	}
 
+	// Count the crossings of the loop between each tile not on the loop and the edge of the board
+	// If the number of crossings is even, then the tile is outside of the loop (tile and border on the same side of the loop)
+	// If the number of crossings is odd, then the tile is inside of the loop (tile and border on opposite sides of the loop)
 	interior := 0
-
 	for i, line := range grid {
 		nCrossings := 0.0
 		for j, tile := range line {
