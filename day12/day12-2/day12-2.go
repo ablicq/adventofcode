@@ -8,6 +8,23 @@ import (
 	"github.com/ablicq/adventofcode/utils"
 )
 
+type SpringProblem struct {
+	symbols string
+	blocks  []int
+}
+
+func convert(s []int) string {
+	str := make([]string, 0)
+	for _, i := range s {
+		str = append(str, strconv.FormatInt(int64(i), 10))
+	}
+	return strings.Join(str, ",")
+}
+
+func (p SpringProblem) String() string {
+	return fmt.Sprintf("%s %s", p.symbols, convert(p.blocks))
+}
+
 func ParseLine(line string) (string, []int, bool) {
 	symbols, blocks, ok := strings.Cut(line, " ")
 	if !ok {
@@ -53,24 +70,28 @@ func firstOccurrence(symbols string, c uint8) int {
 	return len(symbols)
 }
 
-func solve(symbols string, blocks []int) int {
-	if len(blocks) == 0 {
-		if strings.Count(symbols, "#") == 0 {
+func solve(problem SpringProblem, resMap map[string]int) int {
+	res, ok := resMap[problem.String()]
+	if ok {
+		return res
+	}
+	if len(problem.blocks) == 0 {
+		if strings.Count(problem.symbols, "#") == 0 {
 			return 1
 		} else {
 			return 0
 		}
 	}
-	if len(symbols) == 0 {
+	if len(problem.symbols) == 0 {
 		return 0
 	}
 
-	firstBlock := blocks[0]
+	firstBlock := problem.blocks[0]
 	testedMotif := fmt.Sprintf(".%s.", strings.Repeat("#", firstBlock))
-	symbolsExtended := fmt.Sprintf(".%s.", symbols)
+	symbolsExtended := fmt.Sprintf(".%s.", problem.symbols)
 	lastTestedPosition := min(
 		firstOccurrence(symbolsExtended, '#')+firstBlock+1,
-		len(symbolsExtended)-(sumSlice(blocks[1:])+len(blocks[1:])),
+		len(symbolsExtended)-(sumSlice(problem.blocks[1:])+len(problem.blocks[1:])),
 	)
 
 	sum := 0
@@ -78,9 +99,12 @@ func solve(symbols string, blocks []int) int {
 	for i := 0; i < lastTestedPosition-len(testedMotif)+1; i++ {
 		testedSlice := symbolsExtended[i : i+len(testedMotif)]
 		if isCompatible(testedSlice, testedMotif) {
-			next_symbols := symbols[min(i+firstBlock+1, len(symbols)):]
-			next_blocks := blocks[1:]
-			sum += solve(next_symbols, next_blocks)
+			next_symbols := problem.symbols[min(i+firstBlock+1, len(problem.symbols)):]
+			next_blocks := problem.blocks[1:]
+			next_problem := SpringProblem{next_symbols, next_blocks}
+			res := solve(next_problem, resMap)
+			resMap[next_problem.String()] = res
+			sum += res
 		}
 	}
 
@@ -105,8 +129,8 @@ func main() {
 	for _, line := range input {
 		symbols, blocks, _ := ParseLine(line)
 		expandedSymbols, expandedBlocks := expandSymbols(symbols), expandBlocks(blocks)
-		v := solve(expandedSymbols, expandedBlocks)
-		fmt.Println(v)
+		problem := SpringProblem{expandedSymbols, expandedBlocks}
+		v := solve(problem, make(map[string]int, 0))
 		sum += v
 	}
 
